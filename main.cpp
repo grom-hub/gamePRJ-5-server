@@ -1,31 +1,48 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-
-#include <cstdlib>
-#include <cstdio>
-#include <unistd.h>
+#include <sys/time.h>
+#include <unistd.h> // close()
+#include <fcntl.h>
+#include <algorithm> // max_element()
+#include <set>
 #include <iostream>
+#include <cstring> // std::memcpy()
+//#include <stdio.h>
+//using namespace std;
 
-#include "game.h"
 
 
-struct uData
+struct sData
 {
-    int x;
-    int y;
+    int id;
+    int uX;
+    int uY;
+    char uSkin;
+    int command;
 };
 
 
 int main()
 {
-    int sock, listener;
+    int listener;
     struct sockaddr_in addr;
     char buf[1024];
     int bytes_read;
 
-    Game gm;
-    uData ud;
+    std::cout << "Server start" << std::endl;
+
+    sData clientData;
+    sData serverData[5];
+    for (int i = 0; i < 5; ++i)
+    {
+        serverData[i].id = i;
+        serverData[i].uX = 5;
+        serverData[i].uY = 5 + i;
+        serverData[i].uSkin = 'X';
+        serverData[i].command = 0;
+    }
+
 
     listener = socket(AF_INET, SOCK_STREAM, 0);
     if(listener < 0)
@@ -34,61 +51,99 @@ int main()
         exit(1);
     }
     
+    fcntl(listener, F_SETFL, O_NONBLOCK);
+    
     addr.sin_family = AF_INET;
-    addr.sin_port = htons(3425); // 0 - система сама выберет произвольный неиспользуемый в данный момент номер порта.
-                                // 1-1023 - привелигированные порты. 1024-41951 регестрируются в IANA.
-    addr.sin_addr.s_addr = htonl(INADDR_ANY); // INADDR_ANY - соединяться с клиентами через любой интерфейс.
-
-
-    if(bind(listener, (struct sockaddr *)&addr, sizeof(addr)) < 0) // Привязка сокета к адресу.
+    addr.sin_port = htons(3425);
+    addr.sin_addr.s_addr = INADDR_ANY;
+    if(bind(listener, (struct sockaddr *)&addr, sizeof(addr)) < 0)
     {
         perror("bind");
         exit(2);
     }
 
-    listen(listener, 1); // Cокет переводится в режим ожидания запросов со стороны клиентов и создается очередь запросов на соединение.
+    listen(listener, 2);
+    
+    std::set<int> clients;
+    clients.clear();
 
     while(1)
     {
-        std::cout << "Wait for accept...\n";
+        // Заполняем множество сокетов
+        fd_set readset;
+        FD_ZERO(&readset);
+        FD_SET(listener, &readset);
 
-        sock = accept(listener, NULL, NULL);
-        if(sock < 0)
+        for(std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
+            FD_SET(*it, &readset);
+
+        // Задаём таймаут
+        timeval timeout;
+        timeout.tv_sec = 240;
+        timeout.tv_usec = 0;
+
+        // Ждём события в одном из сокетов
+        int mx = std::max(listener, *max_element(clients.begin(), clients.end()));
+        if(select(mx+1, &readset, NULL, NULL, &timeout) <= 0)
         {
-            perror("accept");
+            perror("select");
             exit(3);
         }
-
-        std::cout << "accept!\n";
-
-        while(1)
+        
+        // Определяем тип события и выполняем соответствующие действия
+        if(FD_ISSET(listener, &readset))
         {
-            bytes_read = recv(sock, buf, 1024, 0);
+            std::cout << "Поступил новый запрос на соединение, используем accept" << std::endl;
+            // Поступил новый запрос на соединение, используем accept
+            int sock = accept(listener, NULL, NULL);
+            if(sock < 0)
+            {
+                perror("accept");
+                exit(3);
+            }
+            
+            fcntl(sock, F_SETFL, O_NONBLOCK);
 
-            std::cout << "bytes_read = " <<bytes_read << std::endl;
-
-            if(bytes_read <= 0) break;
-
-            int command = *((int *)&buf);
-            std::cout << "Message form client: " << command << std::endl; // Мой вывод.
-
-            gm.addCommand(command);
-
-            ud.x = gm.getX();
-            ud.y = gm.getY();
-
-            send(sock, &ud, sizeof(uData), 0);
-            //send(sock, buf, bytes_read, 0);
-            // char a[] = "OTVET";
-            // send(sock, &a, 5, 0);
+            clients.insert(sock);
         }
 
-        if(shutdown(sock, SHUT_RDWR) == 0) // Разрывает соединение.
-            std::cout << "Shutdown - OK" << std::endl;
-        if(close(sock) == 0)
-            std::cout << "Close - OK" << std::endl;
-        
+        for(std::set<int>::iterator it = clients.begin(); it != clients.end(); it++)
+        {
+            if(FD_ISSET(*it, &readset))
+            {
+                // Поступили данные от клиента, читаем их
+                bytes_read = recv(*it, buf, 1024, 0);
+
+//-----------------------------------------------------------------------
+
+                std::memcpy(&clientData, &buf, sizeof(sData));
+
+                serverData[clientData.id].uSkin = clientData.uSkin;
+
+                if(clientData.command == 1) serverData[clientData.id].uX ++;
+                if(clientData.command == 2) serverData[clientData.id].uX --;
+                if(clientData.command == 3) serverData[clientData.id].uY ++;
+                if(clientData.command == 4) serverData[clientData.id].uY --;
+
+//------------------------------------------------------------------------
+
+
+                if(bytes_read <= 0)
+                {
+                    // Соединение разорвано, удаляем сокет из множества
+                    std::cout << "shutdown/close socet " << *it << std::endl;
+                    shutdown(*it, SHUT_RDWR);
+                    close(*it);
+                    clients.erase(*it);
+                    continue;
+                }
+
+                // Отправляем данные обратно клиенту
+                send(*it, serverData, sizeof(sData) * 5, 0);
+            }
+        }
     }
     
+    std::cout << "end" << std::endl;
     return 0;
 }
