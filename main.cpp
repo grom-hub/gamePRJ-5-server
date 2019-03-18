@@ -116,7 +116,10 @@ int main()
 
 //-----------------------------------------------------------------------
 
-                std::memcpy(&clientData, &buf, sizeof(sData));
+                if (buf[0] == 1)
+                {
+                    std::memcpy(&clientData, &buf[1], sizeof(sData)); 
+                }
 
                 serverData[clientData.id].uSkin = clientData.uSkin;
 
@@ -139,7 +142,10 @@ int main()
                 }
 
                 // Отправляем данные обратно клиенту
-                send(*it, serverData, sizeof(sData) * 5, 0);
+                buf[0] = 1;
+                std::memcpy(&buf[1], &serverData, sizeof(sData) * 5);
+
+                send(*it, buf, sizeof(sData) * 5, 0);
             }
         }
     }
