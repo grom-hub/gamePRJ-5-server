@@ -30,6 +30,7 @@ int main()
     char buf[1024];
     int bytes_read;
 
+
     std::cout << "Server start" << std::endl;
 
     sData clientData;
@@ -116,17 +117,19 @@ int main()
 
 //-----------------------------------------------------------------------
 
-                if (buf[0] == 1)
+                if (buf[0] == 2)
                 {
                     std::memcpy(&clientData, &buf[1], sizeof(sData)); 
+
+                    serverData[clientData.id].uSkin = clientData.uSkin;
+
+                    if(clientData.command == 1) serverData[clientData.id].uX ++;
+                    if(clientData.command == 2) serverData[clientData.id].uX --;
+                    if(clientData.command == 3) serverData[clientData.id].uY ++;
+                    if(clientData.command == 4) serverData[clientData.id].uY --;
                 }
 
-                serverData[clientData.id].uSkin = clientData.uSkin;
-
-                if(clientData.command == 1) serverData[clientData.id].uX ++;
-                if(clientData.command == 2) serverData[clientData.id].uX --;
-                if(clientData.command == 3) serverData[clientData.id].uY ++;
-                if(clientData.command == 4) serverData[clientData.id].uY --;
+                //std::cout << bytes_read << std::endl;
 
 //------------------------------------------------------------------------
 
@@ -142,7 +145,7 @@ int main()
                 }
 
                 // Отправляем данные обратно клиенту
-                buf[0] = 1;
+                buf[0] = 2;
                 std::memcpy(&buf[1], &serverData, sizeof(sData) * 5);
 
                 send(*it, buf, sizeof(sData) * 5, 0);
