@@ -18,8 +18,10 @@ public:
 private:
     int listener;
     struct sockaddr_in addr;
-    char buf[1024];
+    char recvBuf[1024];
+    char sendBuf[1024];
     int bytes_read;
+    int sdSize;
 
     std::set<int> clients;
 

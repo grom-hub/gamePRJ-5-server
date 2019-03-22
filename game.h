@@ -1,20 +1,20 @@
 #pragma once
 
+#include <vector>
 //#include "server.h"
 
 struct sData
 {
     int id;
-    int uX;
-    int uY;
-    char uSkin;
+    int x;
+    int y;
+    char skin;
     int command;
 };
 
 class Game
 {
 public:
-	void initGame();
 	void recvData(char *buf);
 	void sendData(char *buf);
 
@@ -24,6 +24,8 @@ public:
 
 private:
 	sData clientData;
-    sData serverData[5];
+	std::vector<sData> serverData;
+	//int sdSize;
+	//sData serverData[5];
 
 };

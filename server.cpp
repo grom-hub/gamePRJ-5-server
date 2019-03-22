@@ -90,11 +90,11 @@ void Server::mainLoop(Game &gm)
         {
             if(FD_ISSET(*it, &readset))
             {
-                // Поступили данные от клиента, читаем их
-                bytes_read = recv(*it, buf, 1024, 0);
+// Получение данных -----------------------------------
+                bytes_read = recv(*it, recvBuf, 1024, 0);
 
-                gm.recvData(buf);
-
+                gm.recvData(recvBuf);
+// ----------------------------------------------------
                 //std::cout << bytes_read << std::endl;
 
                 if(bytes_read <= 0)
@@ -107,9 +107,11 @@ void Server::mainLoop(Game &gm)
                     continue;
                 }
 
-                gm.sendData(buf);
+// Отправка данных ------------------------------------
+                gm.sendData(sendBuf, sdSize);
 
-                send(*it, buf, sizeof(sData) * 5, 0);
+                send(*it, sendBuf, sizeof(sData) * sdSize + 2, 0);
+// ----------------------------------------------------
             }
         }
     }

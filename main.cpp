@@ -23,7 +23,6 @@ int main()
     Game gm;
     Server srv;
 
-    gm.initGame();
 
     srv.initServer();
 
@@ -31,6 +30,6 @@ int main()
 
    
     
-    std::cout << "end" << std::endl;
+    std::cout << "end??" << std::endl;
     return 0;
 }
