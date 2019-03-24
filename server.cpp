@@ -90,13 +90,10 @@ void Server::mainLoop(Game &gm)
         {
             if(FD_ISSET(*it, &readset))
             {
+
 // Получение данных -----------------------------------
                 bytes_read = recv(*it, recvBuf, 1024, 0);
-
-                gm.recvData(recvBuf);
-// ----------------------------------------------------
-                //std::cout << bytes_read << std::endl;
-
+        
                 if(bytes_read <= 0)
                 {
                     // Соединение разорвано, удаляем сокет из множества
@@ -107,10 +104,12 @@ void Server::mainLoop(Game &gm)
                     continue;
                 }
 
-// Отправка данных ------------------------------------
-                gm.sendData(sendBuf, sdSize);
+                gm.recvData(recvBuf); // использовать номер сокета (*it) как id игрока.
 
-                send(*it, sendBuf, sizeof(sData) * sdSize + 2, 0);
+// Отправка данных ------------------------------------
+                gm.sendData(sendBuf, sSize);
+
+                send(*it, sendBuf, sizeof(unitBox) * sSize + 2, 0);
 // ----------------------------------------------------
             }
         }

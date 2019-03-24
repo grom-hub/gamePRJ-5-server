@@ -10,18 +10,22 @@
 
 void Game::recvData(char *recvBuf)
 {
-	if (recvBuf[0] == 2)
+	//std::cout << "---------\n";
+
+	if (recvBuf[0] == 2) // Создание персонажа
 	{
-	    std::memcpy(&clientData, &recvBuf[1], sizeof(sData)); 
+	    std::memcpy(&createData, &recvBuf[2], sizeof(crtData)); 
 
-	    // serverData[clientData.id].skin = clientData.skin;
+	    int newid = units.size() + 1;
 
-	    // if(clientData.command == 1) serverData[clientData.id].x ++;
-	    // if(clientData.command == 2) serverData[clientData.id].x --;
-	    // if(clientData.command == 3) serverData[clientData.id].y ++;
-	    // if(clientData.command == 4) serverData[clientData.id].y --;
-		std::cout << "test\n";
-	    
+	    unit.id = newid;
+	    unit.skin = createData.skin;
+	    unit.x = 5;
+	    unit.y = 5 + newid;
+
+	    units.push_back(unit);
+
+		std::cout << "Create person id = " << newid << "\n";	    
 	}
 }
 
@@ -32,23 +36,19 @@ void Game::recvData(char *recvBuf)
 
 
 
-
-
-
-void Game::sendData(char *sendBuf, int &sdSize)
+void Game::sendData(char *sendBuf, int &sSize)
 {
+	//std::cout << "+++++++\n";
 
-	serverData.resize(5);
-	for (int i = 0; i < 5; ++i)
-	{
-		serverData[i].skin = 'X';
-		serverData[i].x = 5;
-		serverData[i].y = 5 + i;
-	}
-
-	sdSize = serverData.size();
-	sendBuf[0] = 2; // тип пакетиа
-	sendBuf[1] = sdSize; // размер
-	std::memcpy(&sendBuf[2], serverData.data(), sdSize * sizeof(sData));
+	sSize = units.size();
+	sendBuf[0] = 4; // тип пакетиа
+	sendBuf[1] = sSize; // размер
+	std::memcpy(&sendBuf[2], units.data(), sSize * sizeof(unitBox));
 
 }
+
+
+// x ++
+// x --
+// y ++
+// y --

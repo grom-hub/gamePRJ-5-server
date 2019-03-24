@@ -12,19 +12,37 @@ struct sData
     int command;
 };
 
+struct crtData
+{
+    int id;
+    char skin;
+};
+
+struct unitBox
+{
+	int id;
+	char skin;
+	int x;
+	int y;
+};
+
 class Game
 {
 public:
 	void recvData(char *buf);
-	void sendData(char *buf);
+	void sendData(char *buf, int &sSize);
 
 
 
 
 
 private:
-	sData clientData;
+	//sData clientData;
 	std::vector<sData> serverData;
+
+	crtData createData;
+	std::vector<unitBox> units;
+	unitBox unit;
 	//int sdSize;
 	//sData serverData[5];
 
