@@ -22,6 +22,7 @@ private:
     char sendBuf[1024];
     int bytes_read;
     int sSize;
+    int clientid;
 
     std::set<int> clients;
 

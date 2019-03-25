@@ -94,17 +94,21 @@ void Server::mainLoop(Game &gm)
 // Получение данных -----------------------------------
                 bytes_read = recv(*it, recvBuf, 1024, 0);
         
+                clientid = *it;
+
                 if(bytes_read <= 0)
                 {
                     // Соединение разорвано, удаляем сокет из множества
+                    
+                    gm.deletePlayer(clientid);
+
                     std::cout << "shutdown/close socet " << *it << std::endl;
                     shutdown(*it, SHUT_RDWR);
                     close(*it);
                     clients.erase(*it);
                     continue;
                 }
-
-                gm.recvData(recvBuf); // использовать номер сокета (*it) как id игрока.
+                gm.recvData(recvBuf, clientid); // использовать номер сокета (*it) как id игрока.
 
 // Отправка данных ------------------------------------
                 gm.sendData(sendBuf, sSize);

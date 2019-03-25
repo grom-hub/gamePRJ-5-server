@@ -29,8 +29,9 @@ struct unitBox
 class Game
 {
 public:
-	void recvData(char *buf);
+	void recvData(char *buf, int clientid);
 	void sendData(char *buf, int &sSize);
+	void deletePlayer(int clientid);
 
 
 

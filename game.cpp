@@ -8,7 +8,7 @@
 
 
 
-void Game::recvData(char *recvBuf)
+void Game::recvData(char *recvBuf, int clientid)
 {
 	//std::cout << "---------\n";
 
@@ -18,21 +18,16 @@ void Game::recvData(char *recvBuf)
 
 	    int newid = units.size() + 1;
 
-	    unit.id = newid;
+	    unit.id = clientid;
 	    unit.skin = createData.skin;
 	    unit.x = 5;
-	    unit.y = 5 + newid;
+	    unit.y = 5 + clientid;
 
 	    units.push_back(unit);
 
-		std::cout << "Create person id = " << newid << "\n";	    
+		std::cout << "Create person id = " << clientid << "\n";	    
 	}
 }
-
-
-
-
-
 
 
 
@@ -47,6 +42,20 @@ void Game::sendData(char *sendBuf, int &sSize)
 
 }
 
+
+
+void Game::deletePlayer(int clientid)
+{
+	for (int i = 0; i < units.size(); i++)
+	{
+		if(units[i].id == clientid)
+		{
+			units.erase(units.begin() + i);
+			break;
+		}
+	}
+	std::cout << "deletePlayer - " << clientid << "\nunits size = " << units.size() << "\n";
+}
 
 // x ++
 // x --
