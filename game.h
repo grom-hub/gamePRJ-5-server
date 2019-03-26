@@ -44,6 +44,7 @@ private:
 	crtData createData;
 	std::vector<unitBox> units;
 	unitBox unit;
+	int answerType;
 	//int sdSize;
 	//sData serverData[5];
 

@@ -11,9 +11,15 @@
 void Game::recvData(char *recvBuf, int clientid)
 {
 	//std::cout << "---------\n";
+	if (recvBuf[0] == 1)
+	{
+		answerType = 4;
+	}
+
 
 	if (recvBuf[0] == 2) // Создание персонажа
 	{
+
 	    std::memcpy(&createData, &recvBuf[2], sizeof(crtData)); 
 
 	    int newid = units.size() + 1;
@@ -25,7 +31,27 @@ void Game::recvData(char *recvBuf, int clientid)
 
 	    units.push_back(unit);
 
-		std::cout << "Create person id = " << clientid << "\n";	    
+		std::cout << "Create person id = " << clientid << "\n";
+
+
+		answerType = 2;
+		createData.id = clientid;
+	}
+
+
+	if (recvBuf[0] == 3)
+	{
+		for(int i = 0; i < units.size(); ++i)
+		{
+			if(units[i].id == recvBuf[2])
+			{
+				if(recvBuf[3] == 1) units[i].x++;
+				if(recvBuf[3] == 2) units[i].x--;
+				if(recvBuf[3] == 3) units[i].y++;
+				if(recvBuf[3] == 4) units[i].y--;
+				break;
+			}
+		}
 	}
 }
 
@@ -34,11 +60,22 @@ void Game::recvData(char *recvBuf, int clientid)
 void Game::sendData(char *sendBuf, int &sSize)
 {
 	//std::cout << "+++++++\n";
+	if (answerType == 2)
+	{
+		sSize = sizeof(crtData);
+		sendBuf[0] = 2; // тип пакетиа
+		sendBuf[1] = sSize; // размер
+		std::memcpy(&sendBuf[2], &createData, sSize);
+	}
 
-	sSize = units.size();
-	sendBuf[0] = 4; // тип пакетиа
-	sendBuf[1] = sSize; // размер
-	std::memcpy(&sendBuf[2], units.data(), sSize * sizeof(unitBox));
+
+	if (answerType == 4)
+	{
+		sSize = units.size();
+		sendBuf[0] = 4; // тип пакетиа
+		sendBuf[1] = sSize; // размер
+		std::memcpy(&sendBuf[2], units.data(), sSize * sizeof(unitBox));	
+	}
 
 }
 
@@ -46,7 +83,7 @@ void Game::sendData(char *sendBuf, int &sSize)
 
 void Game::deletePlayer(int clientid)
 {
-	for (int i = 0; i < units.size(); i++)
+	for (int i = 0; i < units.size(); ++i)
 	{
 		if(units[i].id == clientid)
 		{
