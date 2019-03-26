@@ -39,13 +39,14 @@ void Server::initServer()
 
 	listen(listener, 2);
 
-	// std::set<int> clients;
+	// std::set<int> clients; В хедере.
 	clients.clear();
 }
 
 
 void Server::mainLoop(Game &gm)
 {
+
 	while(1)
     {
         // Заполняем множество сокетов
@@ -95,7 +96,7 @@ void Server::mainLoop(Game &gm)
                 bytes_read = recv(*it, recvBuf, 1024, 0);
         
                 clientid = *it;
-
+                
                 if(bytes_read <= 0)
                 {
                     // Соединение разорвано, удаляем сокет из множества
