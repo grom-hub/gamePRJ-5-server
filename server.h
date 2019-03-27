@@ -18,8 +18,8 @@ public:
 private:
     int listener;
     struct sockaddr_in addr;
-    char recvBuf[1024];
-    char sendBuf[1024];
+    char recvBuff[1024];
+    char sendBuff[1024];
     int bytes_read;
     int sSize;
     int clientid;

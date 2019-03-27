@@ -8,74 +8,128 @@
 
 
 
-void Game::recvData(char *recvBuf, int clientid)
+void Game::createPwrPoints()
 {
-	//std::cout << "---------\n";
-	if (recvBuf[0] == 1)
+	pwrPoints.resize(10);
+
+	for (int i = 0; i < 10; ++i)
 	{
+		pwrPoints[i].skin = '1';
+		pwrPoints[i].x = 10;
+		pwrPoints[i].y = 10 + i;
+	}
+
+}
+
+
+void Game::recvData(char *recvBuff, int clientid)
+{
+	recvBuffPtr = recvBuff;
+	clientidBuff = clientid;
+
+	if (recvBuffPtr[0] == 1)
 		answerType = 4;
-	}
 
-
-	if (recvBuf[0] == 2) // Создание персонажа
-	{
-
-	    std::memcpy(&createData, &recvBuf[2], sizeof(crtData)); 
-
-	    int newid = units.size() + 1;
-
-	    unit.id = clientid;
-	    unit.skin = createData.skin;
-	    unit.x = 5;
-	    unit.y = 5 + clientid;
-
-	    units.push_back(unit);
-
-		std::cout << "Create person id = " << clientid << "\n";
-
-
+	if (recvBuffPtr[0] == 2)
 		answerType = 2;
-		createData.id = clientid;
-	}
+
+	if (recvBuffPtr[0] == 3)
+		movePlayer();
+
+}
 
 
-	if (recvBuf[0] == 3)
+
+void Game::sendData(char *sendBuff, int &sSize)
+{
+	sendBuffPtr = sendBuff;
+
+	if (answerType == 2) // создать игрока
+		createPlayer(sSize);
+
+	if (answerType == 4) // отправить картинку и статусы
+		sendScreen(sSize);
+
+}
+
+
+
+void Game::createPlayer(int &sSize)
+{
+	std::memcpy(&createData, &recvBuffPtr[2], sizeof(crtData)); 
+
+    unit.id = clientidBuff;
+    unit.skin = createData.skin;
+    unit.x = 5;
+    unit.y = 5 + clientidBuff;
+
+    units.push_back(unit);
+
+	createData.id = clientidBuff;
+//------------------------------------
+
+	sSize = sizeof(crtData);
+	sendBuffPtr[0] = 2; // тип пакетиа
+	sendBuffPtr[1] = sSize; // размер
+	std::memcpy(&sendBuffPtr[2], &createData, sSize);
+
+	std::cout << "Create person id = " << clientidBuff << "\n";
+}
+
+
+void Game::movePlayer()
+{
+	for(int i = 0; i < units.size(); ++i)
 	{
-		for(int i = 0; i < units.size(); ++i)
+		if(units[i].id == recvBuffPtr[2])
 		{
-			if(units[i].id == recvBuf[2])
-			{
-				if(recvBuf[3] == 1) units[i].x++;
-				if(recvBuf[3] == 2) units[i].x--;
-				if(recvBuf[3] == 3) units[i].y++;
-				if(recvBuf[3] == 4) units[i].y--;
-				break;
-			}
+			if(recvBuffPtr[3] == 1)
+				units[i].x++;
+			if(recvBuffPtr[3] == 2)
+				units[i].x--;
+			if(recvBuffPtr[3] == 3)
+				units[i].y++;
+			if(recvBuffPtr[3] == 4)
+				units[i].y--;
+			break;
 		}
 	}
 }
 
 
 
-void Game::sendData(char *sendBuf, int &sSize)
+void Game::sendScreen(int &sSize)
 {
-	//std::cout << "+++++++\n";
-	if (answerType == 2)
+
+	printObjects.clear();
+	printObjects.reserve(units.size() + pwrPoints.size());
+
+	for (int i = 0; i < units.size(); ++i)
 	{
-		sSize = sizeof(crtData);
-		sendBuf[0] = 2; // тип пакетиа
-		sendBuf[1] = sSize; // размер
-		std::memcpy(&sendBuf[2], &createData, sSize);
+		printObject.skin = units[i].skin;
+		printObject.x = units[i].x;
+		printObject.y = units[i].y;
+
+		printObjects.push_back(printObject);
+	}
+
+	for (int i = 0; i < pwrPoints.size(); ++i)
+	{
+		printObject.skin = pwrPoints[i].skin;
+		printObject.x = pwrPoints[i].x;
+		printObject.y = pwrPoints[i].y;
+		
+		printObjects.push_back(printObject);
 	}
 
 
-	if (answerType == 4)
-	{
-		sSize = units.size();
-		sendBuf[0] = 4; // тип пакетиа
-		sendBuf[1] = sSize; // размер
-		std::memcpy(&sendBuf[2], units.data(), sSize * sizeof(unitBox));	
-	}
+
+	sSize = printObjects.size();
+	sendBuffPtr[0] = 4; // тип пакетиа
+	sendBuffPtr[1] = sSize; // размер
+	std::memcpy(&sendBuffPtr[2], printObjects.data(), sSize * sizeof(printData));
+
+
 
 }
 
@@ -93,8 +147,3 @@ void Game::deletePlayer(int clientid)
 	}
 	std::cout << "deletePlayer - " << clientid << "\nunits size = " << units.size() << "\n";
 }
-
-// x ++
-// x --
-// y ++
-// y --

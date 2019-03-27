@@ -1,15 +1,15 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 // #include <sys/time.h>
 // #include <unistd.h> // close()
 // #include <fcntl.h>
 // #include <algorithm> // max_element()
 // #include <set>
-#include <iostream>
 //#include <cstring> // std::memcpy()
 //#include <stdio.h>
-//using namespace std;
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <iostream>
 
 #include "game.h"
 #include "server.h"
@@ -23,6 +23,7 @@ int main()
     Game gm;
     Server srv;
 
+    gm.createPwrPoints();
 
     srv.initServer();
 

@@ -64,7 +64,7 @@ void Server::mainLoop(Game &gm)
 
         // Ждём события в одном из сокетов
         int mx = std::max(listener, *max_element(clients.begin(), clients.end()));
-        if(select(mx+1, &readset, NULL, NULL, &timeout) <= 0)
+        if(select(mx+1, &readset, NULL, NULL, NULL) <= 0) //&timeout
         {
             perror("select");
             exit(3);
@@ -93,28 +93,25 @@ void Server::mainLoop(Game &gm)
             {
 
 // Получение данных -----------------------------------
-                bytes_read = recv(*it, recvBuf, 1024, 0);
+                bytes_read = recv(*it, recvBuff, 1024, 0);
         
                 clientid = *it;
                 
                 if(bytes_read <= 0)
-                {
-                    // Соединение разорвано, удаляем сокет из множества
-                    
+                {  
                     gm.deletePlayer(clientid);
-
-                    std::cout << "shutdown/close socet " << *it << std::endl;
+                    std::cout << "delete player/shutdown/close socet " << *it << std::endl;
                     shutdown(*it, SHUT_RDWR);
                     close(*it);
                     clients.erase(*it);
                     continue;
                 }
-                gm.recvData(recvBuf, clientid); // использовать номер сокета (*it) как id игрока.
+                gm.recvData(recvBuff, clientid);
 
 // Отправка данных ------------------------------------
-                gm.sendData(sendBuf, sSize);
+                gm.sendData(sendBuff, sSize);
 
-                send(*it, sendBuf, sizeof(unitBox) * sSize + 2, 0);
+                send(*it, sendBuff, sizeof(unitBox) * sSize + 2, 0);
 // ----------------------------------------------------
             }
         }
