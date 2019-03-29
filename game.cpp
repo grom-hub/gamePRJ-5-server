@@ -8,33 +8,26 @@
 
 
 
-void Game::createPwrPoints()
-{
-	pwrPoints.resize(10);
-
-	for (int i = 0; i < 10; ++i)
-	{
-		pwrPoints[i].skin = '1';
-		pwrPoints[i].x = 10;
-		pwrPoints[i].y = 10 + i;
-	}
-
-}
-
-
 void Game::recvData(char *recvBuff, int clientid)
 {
 	recvBuffPtr = recvBuff;
 	clientidBuff = clientid;
 
 	if (recvBuffPtr[0] == 1)
+	{
 		answerType = 4;
+	}
 
 	if (recvBuffPtr[0] == 2)
+	{
 		answerType = 2;
+	}
 
 	if (recvBuffPtr[0] == 3)
+	{
 		movePlayer();
+		answerType = 4;
+	}
 
 }
 
@@ -47,7 +40,7 @@ void Game::sendData(char *sendBuff, int &sSize)
 	if (answerType == 2) // создать игрока
 		createPlayer(sSize);
 
-	if (answerType == 4) // отправить картинку и статусы
+	if (answerType == 4) // отправить картинку и статус
 		sendScreen(sSize);
 
 }
@@ -56,19 +49,20 @@ void Game::sendData(char *sendBuff, int &sSize)
 
 void Game::createPlayer(int &sSize)
 {
-	std::memcpy(&createData, &recvBuffPtr[2], sizeof(crtData)); 
+	std::memcpy(&createData, &recvBuffPtr[2], sizeof(CrtData)); 
 
     unit.id = clientidBuff;
     unit.skin = createData.skin;
     unit.x = 5;
     unit.y = 5 + clientidBuff;
+    unit.pwr = 0;
 
     units.push_back(unit);
 
 	createData.id = clientidBuff;
 //------------------------------------
 
-	sSize = sizeof(crtData);
+	sSize = sizeof(CrtData);
 	sendBuffPtr[0] = 2; // тип пакетиа
 	sendBuffPtr[1] = sSize; // размер
 	std::memcpy(&sendBuffPtr[2], &createData, sSize);
@@ -91,6 +85,10 @@ void Game::movePlayer()
 				units[i].y++;
 			if(recvBuffPtr[3] == 4)
 				units[i].y--;
+
+			checkPointCollision(units[i].id);
+
+
 			break;
 		}
 	}
@@ -127,7 +125,7 @@ void Game::sendScreen(int &sSize)
 	sSize = printObjects.size();
 	sendBuffPtr[0] = 4; // тип пакетиа
 	sendBuffPtr[1] = sSize; // размер
-	std::memcpy(&sendBuffPtr[2], printObjects.data(), sSize * sizeof(printData));
+	std::memcpy(&sendBuffPtr[2], printObjects.data(), sSize * sizeof(PrintData));
 
 
 
@@ -147,3 +145,40 @@ void Game::deletePlayer(int clientid)
 	}
 	std::cout << "deletePlayer - " << clientid << "\nunits size = " << units.size() << "\n";
 }
+
+
+
+void Game::createPwrPoints()
+{
+	pwrPoints.resize(3);
+
+	pwrPoints[0].skin = '1';
+	pwrPoints[0].x = 10;
+	pwrPoints[0].y = 10;
+
+	pwrPoints[1].skin = '1';
+	pwrPoints[1].x = 15;
+	pwrPoints[1].y = 75;
+
+	pwrPoints[2].skin = '1';
+	pwrPoints[2].x = 23;
+	pwrPoints[2].y = 31;
+
+}
+
+
+void checkPointCollision(int unitid)
+{
+	for (int i = 0; i < pwrPoints.size(); ++i)
+	{
+		if(units[unitid].x == pwrPoints[i].x && units[unitid].y == pwrPoints[i].y)
+		{
+			units[unitid].pwr ++;
+			break;
+		}
+	}
+}
+
+
+
+
