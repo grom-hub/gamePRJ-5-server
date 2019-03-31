@@ -23,7 +23,7 @@ int main()
     Game gm;
     Server srv;
 
-    gm.createPwrPoints();
+    //gm.createPwrPoints();
 
     srv.initServer();
 

@@ -16,7 +16,13 @@ struct PrintData
 	char skin;
 	int x;
 	int y;
+};
+
+struct StatusData
+{
+	int frameNum;
 	int pwr;
+
 };
 
 struct UnitBox
@@ -35,14 +41,16 @@ struct PwrPointBox
 	int y;
 };
 
+
 class Game
 {
 public:
+	Game();
 	void recvData(char *recvBuff, int clientid);
 	void sendData(char *sendBuff, int &sSize);
 	void deletePlayer(int clientid);
 
-	void createPwrPoints();
+	//void createPwrPoints();
 
 
 
@@ -58,10 +66,14 @@ private:
 	std::vector<PrintData> printObjects;
 	PrintData printObject;
 	int answerType;
-	bool toggle;
+	StatusData playerStatus;
+	int frameNum;
+
 
 	void createPlayer(int &sSize);
 	void movePlayer();
 	void sendScreen(int &sSize);
 	void checkPointCollision(int unitid);
+	void sendStatus(int &sSize);
+	void sendZero(int &sSize);
 };
