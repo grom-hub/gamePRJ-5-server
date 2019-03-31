@@ -109,9 +109,9 @@ void Server::mainLoop(Game &gm)
                 gm.recvData(recvBuff, clientid);
 
 // Отправка данных ------------------------------------
-                gm.sendData(sendBuff, sSize);
+                gm.sendData(sendBuff, sendSize);
 
-                send(*it, sendBuff, sSize + 2, 0);
+                send(*it, sendBuff, sendSize + 3, 0);
 // ----------------------------------------------------
             }
         }

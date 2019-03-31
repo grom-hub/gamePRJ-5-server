@@ -21,7 +21,7 @@ private:
     char recvBuff[1024];
     char sendBuff[1024];
     int bytes_read;
-    int sSize;
+    int sendSize;
     int clientid;
 
     std::set<int> clients;
