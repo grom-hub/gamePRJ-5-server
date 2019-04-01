@@ -5,12 +5,6 @@
 
 
 
-struct CrtData
-{
-    int id;
-    char skin;
-};
-
 struct PrintObjectData
 {
 	char skin;
@@ -57,7 +51,6 @@ private:
 	char *recvBuffPtr;
     char *sendBuffPtr;
     int clientidBuff;
-	CrtData createData;
 	std::vector<UnitBox> units;
 	UnitBox unit;
 	std::vector<PwrPointBox> pwrPoints;
@@ -72,7 +65,7 @@ private:
 	void movePlayer();
 	void sendScreen(int &sendSize);
 	void checkPointCollision(int unitid);
-	void sendStatus(int &sendSize);
+	void addStatus(int &sendSize);
 	void sendZero(int &sendSize);
 
 };

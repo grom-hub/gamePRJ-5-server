@@ -111,7 +111,7 @@ void Server::mainLoop(Game &gm)
 // Отправка данных ------------------------------------
                 gm.sendData(sendBuff, sendSize);
 
-                send(*it, sendBuff, sendSize + 3, 0);
+                send(*it, sendBuff, sendSize, 0);
 // ----------------------------------------------------
             }
         }

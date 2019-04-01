@@ -68,7 +68,7 @@ void Game::sendData(char *sendBuff, int &sendSize)
 	if (answerType == 4) // отправить картинку и статус
 	{ 
 		sendScreen(sendSize);
-		sendStatus(sendSize);
+		addStatus(sendSize);
 	}
 
 	if (answerType == 5)
@@ -82,10 +82,9 @@ void Game::sendData(char *sendBuff, int &sendSize)
 
 void Game::createPlayer(int &sendSize)
 {
-	std::memcpy(&createData, &recvBuffPtr[2], sizeof(CrtData)); 
 
     unit.id = clientidBuff;
-    unit.skin = createData.skin;
+    unit.skin = recvBuffPtr[1];
     unit.x = 5;
     unit.y = 5 + clientidBuff;
     unit.pwr = 10 + clientidBuff;
@@ -93,14 +92,9 @@ void Game::createPlayer(int &sendSize)
     units.push_back(unit);
     serverFrameNum ++;
 
-	createData.id = clientidBuff;
-//------------------------------------
-
-	sendSize = sizeof(CrtData);
-	sendBuffPtr[0] = 2; // тип пакетиа
-	//sendBuffPtr[1] = sendSize; // размер
-	std::memcpy(&sendBuffPtr[2], &createData, sendSize);
-
+	sendBuffPtr[0] = 2;
+	sendBuffPtr[1] = clientidBuff;
+	sendSize = 2;
 
 	std::cout << "Create person id = " << clientidBuff << "\n";
 }
@@ -164,7 +158,7 @@ void Game::sendScreen(int &sendSize)
 
 
 
-void Game::sendStatus(int &sendSize)
+void Game::addStatus(int &sendSize)
 {
 
 	for(int i = 0; i < units.size(); ++i)
@@ -176,11 +170,10 @@ void Game::sendStatus(int &sendSize)
 		}
 	}
 
-	//printStatus.serverFrameNum = serverFrameNum;
 	sendBuffPtr[2] = serverFrameNum;
 
 	std::memcpy(&sendBuffPtr[sendSize + 3], &printStatus, sizeof(PrintStatusData));
-	sendSize += sizeof(PrintStatusData);
+	sendSize += sizeof(PrintStatusData) + 3;
 
 }
 
@@ -189,7 +182,7 @@ void Game::sendStatus(int &sendSize)
 void Game::sendZero(int &sendSize)
 {
 	sendBuffPtr[0] = 5;
-	sendSize = 0;
+	sendSize = 1;
 }
 
 
