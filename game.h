@@ -8,18 +8,27 @@
 struct PrintObjectData
 {
 	char skin;
+	int id;
 	int x;
 	int y;
 };
 
 struct PrintStatusData
 {
-	int serverFrameNum;
 	int pwr;
 
 };
 
 struct UnitBox
+{
+	int id;
+	char skin;
+	int x;
+	int y;
+	int pwr;
+};
+
+struct StarBox
 {
 	int id;
 	char skin;
@@ -53,9 +62,10 @@ private:
     int clientidBuff;
 	std::vector<UnitBox> units;
 	UnitBox unit;
-	std::vector<PwrPointBox> pwrPoints;
 	std::vector<PrintObjectData> printObjects;
 	PrintObjectData printObject;
+	std::vector<PwrPointBox> pwrPoints;
+	std::vector<StarBox> stars;
 	int answerType;
 	PrintStatusData printStatus;
 	int serverFrameNum;
@@ -64,8 +74,8 @@ private:
 	void createPlayer(int &sendSize);
 	void movePlayer();
 	void sendScreen(int &sendSize);
-	void checkPointCollision(int unitid);
 	void addStatus(int &sendSize);
 	void sendZero(int &sendSize);
+	void checkPointCollision(int unitid);
 
 };
