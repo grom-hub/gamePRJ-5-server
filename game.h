@@ -31,9 +31,9 @@ struct UnitBox
 struct StarBox
 {
 	int id;
-	char skin;
+	char skin[7];
 	int x;
-	int y;
+	int y[7];
 	int pwr;
 };
 
@@ -77,5 +77,6 @@ private:
 	void addStatus(int &sendSize);
 	void sendZero(int &sendSize);
 	void checkPointCollision(int unitid);
+	void createStars();
 
 };

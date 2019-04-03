@@ -11,27 +11,7 @@ Game::Game()
 {
 	serverFrameNum = 1;
 
-
-	stars.resize(3);
-
-	stars[0].id = 0;
-    stars[0].skin = '*';
-    stars[0].x = 3;
-    stars[0].y = 18;
-    stars[0].pwr = 0;
-
-    stars[1].id = 0;
-    stars[1].skin = '*';
-    stars[1].x = 8;
-    stars[1].y = 68;
-    stars[1].pwr = 0;
-
-    stars[2].id = 0;
-    stars[2].skin = '*';
-    stars[2].x = 12;
-    stars[2].y = 48;
-    stars[2].pwr = 0;
-
+	createStars();
 
 	pwrPoints.resize(3);
 
@@ -106,8 +86,8 @@ void Game::createPlayer(int &sendSize)
 {
     unit.id = clientidBuff;
     unit.skin = recvBuffPtr[1];
-    unit.x = 5;
-    unit.y = 5 + clientidBuff;
+    unit.x = 6;
+    unit.y = 34 + clientidBuff;
     unit.pwr = 0;
 
     units.push_back(unit);
@@ -150,19 +130,21 @@ void Game::movePlayer()
 void Game::sendScreen(int &sendSize)
 {
 	printObjects.clear();
-	printObjects.reserve(units.size() + pwrPoints.size() + stars.size());
-
+	printObjects.reserve(units.size() + pwrPoints.size() + stars.size() * 7);
 
 	for(int i = 0; i < stars.size(); ++i)
 	{
-		printObject.skin = stars[i].skin;
-		printObject.id = 0;
-		printObject.x = stars[i].x;
-		printObject.y = stars[i].y;
-		
-		printObjects.push_back(printObject);
-	}
+		for(int j = 0; j <= 6; ++j)
+		{
+			printObject.skin = stars[i].skin[j];
+			printObject.id = stars[i].id;
+			printObject.x = stars[i].x;
+			printObject.y = stars[i].y[j];
 
+			printObjects.push_back(printObject);
+		}
+	}
+	
 	for (int i = 0; i < pwrPoints.size(); ++i)
 	{
 		printObject.skin = pwrPoints[i].skin;
@@ -248,6 +230,87 @@ void Game::checkPointCollision(int unitIndex)
 			break;
 		}
 	}
+}
+
+
+
+void Game::createStars()
+{
+	stars.resize(4);
+
+
+	stars[0].id = 0;
+    stars[0].skin[0] = ' ';
+    stars[0].skin[1] = ' ';
+    stars[0].skin[2] = '(';
+    stars[0].skin[3] = '*';
+    stars[0].skin[4] = ')';
+    stars[0].skin[5] = ' ';
+    stars[0].skin[6] = ' ';
+    stars[0].x = 0;
+    stars[0].y[0] = 15;
+    stars[0].y[1] = 16;
+    stars[0].y[2] = 17;
+    stars[0].y[3] = 18;
+    stars[0].y[4] = 19;
+    stars[0].y[5] = 20;
+    stars[0].y[6] = 21;
+    stars[0].pwr = 0;
+
+    stars[1].id = 1;
+    stars[1].skin[0] = ' ';
+    stars[1].skin[1] = '(';
+    stars[1].skin[2] = '(';
+    stars[1].skin[3] = '*';
+    stars[1].skin[4] = ')';
+    stars[1].skin[5] = ')';
+    stars[1].skin[6] = ' ';
+    stars[1].x = 8;
+    stars[1].y[0] = 85;
+    stars[1].y[1] = 86;
+    stars[1].y[2] = 87;
+    stars[1].y[3] = 88;
+    stars[1].y[4] = 89;
+    stars[1].y[5] = 90;
+    stars[1].y[6] = 91;
+    stars[1].pwr = 0;
+
+    stars[2].id = 2;
+    stars[2].skin[0] = '(';
+    stars[2].skin[1] = '(';
+    stars[2].skin[2] = '(';
+    stars[2].skin[3] = '*';
+    stars[2].skin[4] = ')';
+    stars[2].skin[5] = ')';
+    stars[2].skin[6] = ')';
+    stars[2].x = -10;
+    stars[2].y[0] = 45;
+    stars[2].y[1] = 46;
+    stars[2].y[2] = 47;
+    stars[2].y[3] = 48;
+    stars[2].y[4] = 49;
+    stars[2].y[5] = 50;
+    stars[2].y[6] = 51;
+    stars[2].pwr = 0;
+
+
+    stars[3].id = 3;
+    stars[3].skin[0] = ' ';
+    stars[3].skin[1] = '(';
+    stars[3].skin[2] = '-';
+    stars[3].skin[3] = '^';
+    stars[3].skin[4] = '-';
+    stars[3].skin[5] = ')';
+    stars[3].skin[6] = ' ';
+    stars[3].x = 7;
+    stars[3].y[0] = 35;
+    stars[3].y[1] = 36;
+    stars[3].y[2] = 37;
+    stars[3].y[3] = 38;
+    stars[3].y[4] = 39;
+    stars[3].y[5] = 40;
+    stars[3].y[6] = 41;
+    stars[3].pwr = 0;
 }
 
 
