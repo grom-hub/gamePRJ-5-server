@@ -87,8 +87,24 @@ void Game::createPlayer(int &sendSize)
     unit.id = clientidBuff;
     unit.skin = recvBuffPtr[1];
     unit.x = 6;
-    unit.y = 34 + clientidBuff;
+    unit.y = 34;
     unit.pwr = 0;
+
+    bool checkFreeSpace;
+    do
+    {
+    	checkFreeSpace = true;
+	    for(int i = 0; i < units.size(); ++i)
+		{
+			if(unit.x == units[i].x && unit.y == units[i].y)
+			{
+				checkFreeSpace = false;
+				unit.y ++;
+				break;
+			}
+		}
+	}
+    while(!checkFreeSpace);
 
     units.push_back(unit);
     serverFrameNum ++;
@@ -107,19 +123,21 @@ void Game::movePlayer()
 	{
 		if(units[i].id == recvBuffPtr[1])
 		{
-			if(recvBuffPtr[2] == 1)
-				units[i].x++;
-			if(recvBuffPtr[2] == 2)
-				units[i].x--;
-			if(recvBuffPtr[2] == 3)
-				units[i].y++;
-			if(recvBuffPtr[2] == 4)
-				units[i].y--;
+			if(checkObstacle(i)) // Проверка использует recvBuffPtr[2]
+			{
+				if(recvBuffPtr[2] == 1)
+					units[i].x++;
+				if(recvBuffPtr[2] == 2)
+					units[i].x--;
+				if(recvBuffPtr[2] == 3)
+					units[i].y++;
+				if(recvBuffPtr[2] == 4)
+					units[i].y--;
 
-			serverFrameNum ++;
+				serverFrameNum ++;
 
-			checkPointCollision(i);
-
+				checkPointCollision(i);
+			}
 			break;
 		}
 	}
@@ -137,7 +155,7 @@ void Game::sendScreen(int &sendSize)
 		for(int j = 0; j <= 6; ++j)
 		{
 			printObject.skin = stars[i].skin[j];
-			printObject.id = stars[i].id;
+			printObject.id = 0; // без 0 будет конфлик с units.id
 			printObject.x = stars[i].x;
 			printObject.y = stars[i].y[j];
 
@@ -148,7 +166,7 @@ void Game::sendScreen(int &sendSize)
 	for (int i = 0; i < pwrPoints.size(); ++i)
 	{
 		printObject.skin = pwrPoints[i].skin;
-		printObject.id = 0;
+		printObject.id = 0; // без 0 будет конфлик с units.id
 		printObject.x = pwrPoints[i].x;
 		printObject.y = pwrPoints[i].y;
 		
@@ -217,6 +235,27 @@ void Game::deletePlayer(int clientid)
 	std::cout << "deletePlayer - " << clientid << "\nunits size = " << units.size() << "\n";
 }
 
+
+
+bool Game::checkObstacle(int checkindex)
+{
+	int moveX = 0;
+	int moveY = 0;
+	if(recvBuffPtr[2] == 1) moveX = 1;
+	if(recvBuffPtr[2] == 2) moveX = -1;
+	if(recvBuffPtr[2] == 3) moveY = 1;
+	if(recvBuffPtr[2] == 4) moveY = -1;
+
+	for(int i = 0; i < units.size(); ++i)
+	{
+		if(units[checkindex].x + moveX == units[i].x && units[checkindex].y + moveY == units[i].y)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
 
 
 

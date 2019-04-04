@@ -78,5 +78,6 @@ private:
 	void sendZero(int &sendSize);
 	void checkPointCollision(int unitid);
 	void createStars();
+	bool checkObstacle(int checkindex);
 
 };
