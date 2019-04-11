@@ -19,7 +19,7 @@ private:
     int listener;
     struct sockaddr_in addr;
     char recvBuff[1024];
-    char sendBuff[1024];
+    char sendBuff[102400];
     int bytes_read;
     int sendSize;
     int clientid;

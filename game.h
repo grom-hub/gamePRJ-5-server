@@ -1,11 +1,17 @@
 #pragma once
 
 #include <vector>
+#include <string>
 //#include "server.h"
 
 
+struct CreateData
+{
+	char skin;
+	std::string planet;
+};
 
-struct PrintObjectData
+struct PrintData
 {
 	char skin;
 	int id;
@@ -16,7 +22,6 @@ struct PrintObjectData
 struct PrintStatusData
 {
 	int pwr;
-
 };
 
 struct UnitBox
@@ -26,15 +31,14 @@ struct UnitBox
 	int x;
 	int y;
 	int pwr;
+	std::string planet;
 };
 
 struct StarBox
 {
-	int id;
-	char skin[7];
+	std::string skinMap;
 	int x;
-	int y[7];
-	int pwr;
+	int y;
 };
 
 struct PwrPointBox
@@ -60,24 +64,34 @@ private:
 	char *recvBuffPtr;
     char *sendBuffPtr;
     int clientidBuff;
+	int unitsFrameNum;
+	int pwrPointsFrameNum;
+	int starsFrameNum;
+	int vectorSize[3];
+    CreateData createData;
+	std::vector<PrintData> printObjects;
+	PrintData printObject;
 	std::vector<UnitBox> units;
 	UnitBox unit;
-	std::vector<PrintObjectData> printObjects;
-	PrintObjectData printObject;
 	std::vector<PwrPointBox> pwrPoints;
 	std::vector<StarBox> stars;
-	int answerType;
+	StarBox star;
 	PrintStatusData printStatus;
-	int serverFrameNum;
+
 
 
 	void createPlayer(int &sendSize);
 	void movePlayer();
-	void sendScreen(int &sendSize);
-	void addStatus(int &sendSize);
+
+	void sendUnits(int &sendSize);
+	void sendPwrPoints(int &sendSize);
+	void sendStars(int &sendSize);
+	void sendStatus(int &sendSize);
 	void sendZero(int &sendSize);
+
 	void checkPointCollision(int unitid);
-	void createStars();
 	bool checkObstacle(int checkindex);
+	void createStars();
+	void createPlanet();
 
 };

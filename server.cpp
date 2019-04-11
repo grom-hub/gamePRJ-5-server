@@ -107,11 +107,13 @@ void Server::mainLoop(Game &gm)
                     continue;
                 }
                 gm.recvData(recvBuff, clientid);
+                //std::cout << "read - " << bytes_read << std::endl;
 
 // Отправка данных ------------------------------------
                 gm.sendData(sendBuff, sendSize);
 
                 send(*it, sendBuff, sendSize, 0);
+                //std::cout << "send - " << sendSize << std::endl;
 // ----------------------------------------------------
             }
         }
