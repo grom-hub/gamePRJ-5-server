@@ -18,18 +18,13 @@
 
 int main()
 {
-   
-
     Game gm;
     Server srv;
-
 
     srv.initServer();
 
     srv.mainLoop(gm);
 
-   
-    
     std::cout << "end??" << std::endl;
     return 0;
 }

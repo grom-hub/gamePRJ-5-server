@@ -79,38 +79,66 @@ void Game::sendData(char *sendBuff, int &sendSize)
 
 	if(recvBuffPtr[0] == 3)
 	{
-		std::fill(vectorSize, vectorSize + 3, 0); // Обнулить размеры векторов
+		if(unitsFrameNum == recvBuffPtr[3] 
+			&& pwrPointsFrameNum == recvBuffPtr[4] 
+			&& starsFrameNum == recvBuffPtr[5])
+			sendZero(sendSize);
+		else
+		{
+			std::fill(vectorSize, vectorSize + 3, 0); // Обнулить размеры векторов
+			sendSize = sizeof(int) * 3 + 4;
 
-		sendSize = sizeof(int) * 3 + 4;
-		bool upToDate = true;
-		if(unitsFrameNum != recvBuffPtr[3])
-		{
-			upToDate = false;
-			sendUnits(sendSize);
-		}
-		if(pwrPointsFrameNum != recvBuffPtr[4])
-		{
-			upToDate = false;
-			sendPwrPoints(sendSize);
-			sendStatus(sendSize);
-		}
-		if(starsFrameNum != recvBuffPtr[5])
-		{
-			upToDate = false;
-			sendStars(sendSize);
-		}
-		if(!upToDate)
-		{
+			if(unitsFrameNum != recvBuffPtr[3])
+			{
+				sendUnits(sendSize);
+			}
+			if(pwrPointsFrameNum != recvBuffPtr[4])
+			{
+				sendPwrPoints(sendSize);
+				sendStatus(sendSize);
+			}
+			if(starsFrameNum != recvBuffPtr[5])
+			{
+				sendStars(sendSize);
+			}
 			sendBuffPtr[0] = 4; // тип пакета
 			sendBuffPtr[1] = unitsFrameNum;
 			sendBuffPtr[2] = pwrPointsFrameNum;
 			sendBuffPtr[3] = starsFrameNum;
 			std::memcpy(&sendBuffPtr[4], &vectorSize, sizeof(int) * 3);
 		}
-		if(upToDate)
-			sendZero(sendSize);
-	}
 
+		// std::fill(vectorSize, vectorSize + 3, 0); // Обнулить размеры векторов
+
+		// sendSize = sizeof(int) * 3 + 4;
+		// bool upToDate = true;
+		// if(unitsFrameNum != recvBuffPtr[3])
+		// {
+		// 	upToDate = false;
+		// 	sendUnits(sendSize);
+		// }
+		// if(pwrPointsFrameNum != recvBuffPtr[4])
+		// {
+		// 	upToDate = false;
+		// 	sendPwrPoints(sendSize);
+		// 	sendStatus(sendSize);
+		// }
+		// if(starsFrameNum != recvBuffPtr[5])
+		// {
+		// 	upToDate = false;
+		// 	sendStars(sendSize);
+		// }
+		// if(!upToDate)
+		// {
+		// 	sendBuffPtr[0] = 4; // тип пакета
+		// 	sendBuffPtr[1] = unitsFrameNum;
+		// 	sendBuffPtr[2] = pwrPointsFrameNum;
+		// 	sendBuffPtr[3] = starsFrameNum;
+		// 	std::memcpy(&sendBuffPtr[4], &vectorSize, sizeof(int) * 3);
+		// }
+		// if(upToDate)
+		// 	sendZero(sendSize);
+	}
 }
 
 
