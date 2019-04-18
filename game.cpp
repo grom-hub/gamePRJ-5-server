@@ -69,9 +69,9 @@ void Game::recvData(char *recvBuff, int clientid)
 
 
 
-void Game::sendData(char *sendBuff, int &sendSize)
+void Game::sendData(char *sendPreBuff, int &sendSize)
 {
-	sendBuffPtr = sendBuff;
+	sendPreBuffPtr = sendPreBuff;
 
 	if (recvBuffPtr[0] == 2) // создать игрока
 		createPlayer(sendSize);
@@ -85,7 +85,7 @@ void Game::sendData(char *sendBuff, int &sendSize)
 			sendZero(sendSize);
 		else
 		{
-			std::fill(vectorSize, vectorSize + 3, 0); // Обнулить размеры векторов
+			std::fill(printObjectsSize, printObjectsSize + 3, 0); // Обнулить размеры векторов
 			sendSize = sizeof(int) * 3 + 4;
 
 			if(unitsFrameNum != recvBuffPtr[3])
@@ -101,43 +101,12 @@ void Game::sendData(char *sendBuff, int &sendSize)
 			{
 				sendStars(sendSize);
 			}
-			sendBuffPtr[0] = 4; // тип пакета
-			sendBuffPtr[1] = unitsFrameNum;
-			sendBuffPtr[2] = pwrPointsFrameNum;
-			sendBuffPtr[3] = starsFrameNum;
-			std::memcpy(&sendBuffPtr[4], &vectorSize, sizeof(int) * 3);
+			sendPreBuffPtr[0] = 4; // тип пакета
+			sendPreBuffPtr[1] = unitsFrameNum;
+			sendPreBuffPtr[2] = pwrPointsFrameNum;
+			sendPreBuffPtr[3] = starsFrameNum;
+			std::memcpy(&sendPreBuffPtr[4], &printObjectsSize, sizeof(int) * 3);
 		}
-
-		// std::fill(vectorSize, vectorSize + 3, 0); // Обнулить размеры векторов
-
-		// sendSize = sizeof(int) * 3 + 4;
-		// bool upToDate = true;
-		// if(unitsFrameNum != recvBuffPtr[3])
-		// {
-		// 	upToDate = false;
-		// 	sendUnits(sendSize);
-		// }
-		// if(pwrPointsFrameNum != recvBuffPtr[4])
-		// {
-		// 	upToDate = false;
-		// 	sendPwrPoints(sendSize);
-		// 	sendStatus(sendSize);
-		// }
-		// if(starsFrameNum != recvBuffPtr[5])
-		// {
-		// 	upToDate = false;
-		// 	sendStars(sendSize);
-		// }
-		// if(!upToDate)
-		// {
-		// 	sendBuffPtr[0] = 4; // тип пакета
-		// 	sendBuffPtr[1] = unitsFrameNum;
-		// 	sendBuffPtr[2] = pwrPointsFrameNum;
-		// 	sendBuffPtr[3] = starsFrameNum;
-		// 	std::memcpy(&sendBuffPtr[4], &vectorSize, sizeof(int) * 3);
-		// }
-		// if(upToDate)
-		// 	sendZero(sendSize);
 	}
 }
 
@@ -157,9 +126,12 @@ void Game::sendUnits(int &sendSize)
 		printObjects.push_back(printObject);
 	}
 
-	vectorSize[0] = printObjects.size();
+	printObjectsSize[0] = printObjects.size();
 
-	std::memcpy(&sendBuffPtr[sendSize], printObjects.data(), printObjects.size() * sizeof(PrintData));
+	if(sendSize + printObjects.size() * sizeof(PrintData) > SEND_BUFF_WORK_SIZE)
+		std::cout << "SendBuffer overload !\n";
+
+	std::memcpy(&sendPreBuffPtr[sendSize], printObjects.data(), printObjects.size() * sizeof(PrintData));
 	sendSize += printObjects.size() * sizeof(PrintData);
 }
 
@@ -180,9 +152,12 @@ void Game::sendPwrPoints(int &sendSize)
 		printObjects.push_back(printObject);
 	}
 
-	vectorSize[1] = printObjects.size();
+	printObjectsSize[1] = printObjects.size();
 
-	std::memcpy(&sendBuffPtr[sendSize], printObjects.data(), printObjects.size() * sizeof(PrintData));
+	if(sendSize + printObjects.size() * sizeof(PrintData) > SEND_BUFF_WORK_SIZE)
+		std::cout << "SendBuffer overload !\n";
+
+	std::memcpy(&sendPreBuffPtr[sendSize], printObjects.data(), printObjects.size() * sizeof(PrintData));
 	sendSize += printObjects.size() * sizeof(PrintData);
 }
 
@@ -200,7 +175,10 @@ void Game::sendStatus(int &sendSize)
 		}
 	}
 
-	std::memcpy(&sendBuffPtr[sendSize], &printStatus, sizeof(PrintStatusData));
+	if(sendSize + sizeof(PrintStatusData) > SEND_BUFF_WORK_SIZE)
+		std::cout << "SendBuffer overload !\n";
+
+	std::memcpy(&sendPreBuffPtr[sendSize], &printStatus, sizeof(PrintStatusData));
 	sendSize += sizeof(PrintStatusData);
 }
 
@@ -223,9 +201,12 @@ void Game::sendStars(int &sendSize)
 		}
 	}
 
-	vectorSize[2] = printObjects.size();
+	printObjectsSize[2] = printObjects.size();
 
-	std::memcpy(&sendBuffPtr[sendSize], printObjects.data(), printObjects.size() * sizeof(PrintData));
+	if(sendSize + printObjects.size() * sizeof(PrintData) > SEND_BUFF_WORK_SIZE)
+		std::cout << "SendBuffer overload !\n";
+
+	std::memcpy(&sendPreBuffPtr[sendSize], printObjects.data(), printObjects.size() * sizeof(PrintData));
 	sendSize += printObjects.size() * sizeof(PrintData);
 }
 
@@ -233,7 +214,7 @@ void Game::sendStars(int &sendSize)
 
 void Game::sendZero(int &sendSize)
 {
-	sendBuffPtr[0] = 5;
+	sendPreBuffPtr[0] = 5;
 	sendSize = 1;
 }
 
@@ -270,8 +251,8 @@ void Game::createPlayer(int &sendSize)
     units.push_back(unit);
     unitsFrameNum ++;
 
-	sendBuffPtr[0] = 2;
-	sendBuffPtr[1] = clientidBuff;
+	sendPreBuffPtr[0] = 2;
+	sendPreBuffPtr[1] = clientidBuff;
 	sendSize = 2;
 
 	std::cout << "Create person id = " << clientidBuff << "\n";
@@ -407,197 +388,3 @@ void Game::createStars()
 
     stars.push_back(star);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// if (answerType == 4) // отправить картинку и статус
-// { 
-// 	sendScreen(sendSize);
-// 	addStatus(sendSize);
-// }
-
-
-
-
-// void Game::updatePrintData()
-// {
-// 	printObjects.clear();
-// 	printObjects.reserve(units.size() + pwrPoints.size() + stars.size() * 7);
-
-// 	for(int i = 0; i < stars.size(); ++i)
-// 	{
-// 		for(int j = 0; j < stars[i].skinMap.size(); ++j)
-// 		{
-// 			printObject.skin = stars[i].skinMap[j];
-// 			printObject.id = 0; // без 0 будет конфлик с units.id
-// 			printObject.x = stars[i].x;
-// 			printObject.y = stars[i].y + j;
-
-// 			printObjects.push_back(printObject);
-// 		}
-// 	}
-	
-// 	for (int i = 0; i < pwrPoints.size(); ++i)
-// 	{
-// 		printObject.skin = pwrPoints[i].skin;
-// 		printObject.id = 0; // без 0 будет конфлик с units.id
-// 		printObject.x = pwrPoints[i].x;
-// 		printObject.y = pwrPoints[i].y;
-		
-// 		printObjects.push_back(printObject);
-// 	}
-
-// 	for (int i = 0; i < units.size(); ++i)
-// 	{
-// 		printObject.skin = units[i].skin;
-// 		printObject.id = units[i].id;
-// 		printObject.x = units[i].x;
-// 		printObject.y = units[i].y;
-
-// 		printObjects.push_back(printObject);
-// 	}
-// }
-
-
-
-
-
-
-// void Game::sendScreen(int &sendSize)
-// {
-// 	updatePrintData();
-
-
-// 	for(int i = 0; i < printObjects.size(); ++i)
-// 	{
-// 		for(int j = 0; clientObjectsUid.size(); ++j)
-// 		{
-// 			if(clientObjectsUid == printObjects[i].uid)
-// 				break;
-// 			else
-// 				// отправить клиенту
-// 		}
-// 	}
-
-
-
-// 	sendSize = printObjects.size() * sizeof(PrintObjectData);
-// 	sendBuffPtr[0] = 4; // тип пакетиа
-// 	sendBuffPtr[1] = printObjects.size();
-// 	std::memcpy(&sendBuffPtr[3], printObjects.data(), sendSize);
-// 	std::cout << printObjects.size() << std::endl;
-// }
-
-
-
-// void Game::addStatus(int &sendSize)
-// {
-
-// 	for(int i = 0; i < units.size(); ++i)
-// 	{
-// 		if(units[i].id == recvBuffPtr[1])
-// 		{
-// 			printStatus.pwr = units[i].pwr;
-// 			break;
-// 		}
-// 	}
-
-// 	sendBuffPtr[2] = serverFrameNum;
-
-
-// 	std::memcpy(&sendBuffPtr[sendSize + 3], &printStatus, sizeof(PrintStatusData));
-// 	sendSize += sizeof(PrintStatusData) + 3;
-
-// }
-
-
-
-
-
-
-
-// void Game::updatePrintData()
-// {
-
-// 	for(int i = 0; i < stars.size(); ++i)
-// 	{
-// 		if(stars[i].changed == true)
-// 		{
-// 			for(int j = 0; j < stars[i].skinMap.size(); ++j)
-// 			{
-// 				printObject.skin = stars[i].skinMap[j];
-// 				printObject.id = 0; // без 0 будет конфлик с units.id
-// 				printObject.x = stars[i].x;
-// 				printObject.y = stars[i].y + j;
-
-// 				printObjects.push_back(printObject);
-// 			}
-// 			stars[i].changed = false;
-// 		}
-// 	}
-
-
-// 	for (int i = 0; i < pwrPoints.size(); ++i)
-// 	{
-// 		if(pwrPoints[i].changed == true)
-// 		{
-// 			for(int j = 0; j < printObjects.size(); ++j)
-// 			{
-// 				if(pwrPoints[i].uid == printObjects[j].uid)
-// 				{
-// 					printObjects[j].skin = pwrPoints[i].skin;
-// 					break;
-// 				}
-// 				else
-// 				{
-// 					printObject.skin = pwrPoints[i].skin;
-// 					printObject.id = 0; // без 0 будет конфлик с units.id
-// 					printObject.x = pwrPoints[i].x;
-// 					printObject.y = pwrPoints[i].y;
-					
-// 					printObjects.push_back(printObject);
-// 				}
-// 			}
-// 			pwrPoints[i].changed = false;
-// 		}
-// 	}
-
-
-// 	for (int i = 0; i < units.size(); ++i)
-// 	{
-// 		if(units[i].changed == true)
-// 		{
-// 			for(int j = 0; j < printObjects.size(); ++j)
-// 			{
-// 				if(units[i].uid == printObjects[j].uid)
-// 				{
-// 					printObjects[j].x = units[i].x;
-// 					printObjects[j].y = units[i].y;
-// 					break;
-// 				}
-// 				else
-// 				{
-// 					printObject.skin = units[i].skin;
-// 					printObject.id = units[i].id;
-// 					printObject.x = units[i].x;
-// 					printObject.y = units[i].y;
-
-// 					printObjects.push_back(printObject);
-// 				}
-// 			}
-// 			units[i].changed = false;
-// 		}
-// 	}
-// }

@@ -4,7 +4,8 @@
 
 #include "game.h"
 
-
+const int SEND_BUFF_SIZE = 102400;
+const int RECV_BUFF_SIZE = 1024;
 
 class Server
 {
@@ -18,14 +19,20 @@ public:
 private:
     int listener;
     struct sockaddr_in addr;
-    char recvBuff[1024];
-    char sendBuff[102400];
-    int bytes_read;
-    int sendSize;
-    int clientid;
-
     std::set<int> clients;
 
+    char recvBuff[RECV_BUFF_SIZE];
+    char sendPreBuff[SEND_BUFF_SIZE];
+    char sendBuff[SEND_BUFF_SIZE];
+
+    int bytes_read;
+
+    int bytesSend;
+    int totalBytesSend;
+    int targetSendSize;
+    int sendSize;
+
+    int clientid;
 
 
 };

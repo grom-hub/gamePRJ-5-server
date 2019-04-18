@@ -5,6 +5,9 @@
 //#include "server.h"
 
 
+const int SEND_BUFF_WORK_SIZE = 100000;
+
+
 struct CreateData
 {
 	char skin;
@@ -62,12 +65,12 @@ public:
 
 private:
 	char *recvBuffPtr;
-    char *sendBuffPtr;
+    char *sendPreBuffPtr;
     int clientidBuff;
 	int unitsFrameNum;
 	int pwrPointsFrameNum;
 	int starsFrameNum;
-	int vectorSize[3];
+	int printObjectsSize[3];
     CreateData createData;
 	std::vector<PrintData> printObjects;
 	PrintData printObject;

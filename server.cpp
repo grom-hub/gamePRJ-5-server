@@ -10,6 +10,8 @@
 //#include <cstring> // std::memcpy()
 //#include <stdio.h>
 //using namespace std;
+#include <cstring> // std::memcpy()
+#include <unistd.h> // usleep()
 
 #include "server.h"
 #include "game.h"
@@ -110,11 +112,31 @@ void Server::mainLoop(Game &gm)
                 //std::cout << "read - " << bytes_read << std::endl;
 
 // Отправка данных ------------------------------------
-                gm.sendData(sendBuff, sendSize);
+                gm.sendData(sendPreBuff, sendSize);
 
-                send(*it, sendBuff, sendSize, 0);
-                //std::cout << "send - " << sendSize << std::endl;
-// ----------------------------------------------------
+
+                std::memcpy(&sendBuff, &sendSize, sizeof(int));
+
+                std::memcpy(&sendBuff[sizeof(int)], &sendPreBuff, sendSize);
+
+
+                bytesSend = send(*it, sendBuff, sendSize + sizeof(int), 0);
+
+                targetSendSize = sendSize + sizeof(int);
+
+                totalBytesSend = bytesSend;
+
+                while(totalBytesSend != targetSendSize)
+                {
+                    usleep(1000);
+
+                    bytesSend = send(*it, &sendBuff[totalBytesSend], targetSendSize - totalBytesSend, 0);
+                    totalBytesSend += bytesSend;
+
+                    std::cout << "ReSending.."<< std::endl;
+                }
+
+                // std::cout << "send - " << test1 << std::endl;
             }
         }
     }
