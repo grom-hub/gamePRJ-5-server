@@ -46,10 +46,10 @@ void Server::initServer()
 }
 
 
-void Server::mainLoop(Game &gm)
+void Server::mainLoop(Game &gm, char &a)
 {
 
-	while(1)
+	while(true)
     {
         // Заполняем множество сокетов
         fd_set readset;
@@ -60,9 +60,9 @@ void Server::mainLoop(Game &gm)
             FD_SET(*it, &readset);
 
         // Задаём таймаут
-        timeval timeout;
-        timeout.tv_sec = 240;
-        timeout.tv_usec = 0;
+        // timeval timeout;
+        // timeout.tv_sec = 240;
+        // timeout.tv_usec = 0;
 
         // Ждём события в одном из сокетов
         int mx = std::max(listener, *max_element(clients.begin(), clients.end()));
@@ -72,6 +72,14 @@ void Server::mainLoop(Game &gm)
             exit(3);
         }
         
+        if(a == 'q')
+        {
+            shutdown(listener, SHUT_RDWR);
+            close(listener);
+            std::cout << "listner - OFF" << std::endl;
+            return;
+        }
+
         // Определяем тип события и выполняем соответствующие действия
         if(FD_ISSET(listener, &readset))
         {

@@ -10,21 +10,38 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <iostream>
+#include<thread>
 
 #include "game.h"
 #include "server.h"
 
 
+#include <unistd.h> // usleep()
+
+
+
+void threadFunction(char &a)
+{
+	while((a = getchar()) != 'q');
+}
+
 
 int main()
 {
+	char a;
     Game gm;
     Server srv;
 
+
+    std::thread thr(threadFunction, std::ref(a));
+
+
     srv.initServer();
 
-    srv.mainLoop(gm);
+    srv.mainLoop(gm, a);
 
-    std::cout << "end??" << std::endl;
+    std::cout << "Server - OFF" << std::endl;
+
+    thr.join();
     return 0;
 }

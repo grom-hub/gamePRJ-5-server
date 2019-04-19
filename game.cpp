@@ -57,7 +57,7 @@ void Game::recvData(char *recvBuff, int clientid)
 	{
 		if(recvBuffPtr[2] != 0) // Обработка команды управления персонажем
 			if(recvBuffPtr[2] == 5)
-				recvBuffPtr[2] = 5; // резерв
+				takePWR();
 			else
 				movePlayer();
 	}
@@ -244,7 +244,7 @@ void Game::movePlayer()
 				if(recvBuffPtr[2] == 4)
 					units[i].y--;
 
-				checkPointCollision(i);
+				// checkPointCollision(i);
 				unitsFrameNum ++;
 			}
 			break;
@@ -293,16 +293,38 @@ bool Game::checkObstacle(int checkindex)
 
 
 
-void Game::checkPointCollision(int unitIndex)
+// void Game::checkPointCollision(int unitIndex)
+// {
+// 	for (int i = 0; i < pwrPoints.size(); ++i)
+// 	{
+// 		if(units[unitIndex].x == pwrPoints[i].x && units[unitIndex].y == pwrPoints[i].y && pwrPoints[i].skin == '1')
+// 		{
+// 			units[unitIndex].pwr ++;
+// 			pwrPoints[i].skin = '0';
+// 			pwrPointsFrameNum ++;
+// 			break;
+// 		}
+// 	}
+// }
+
+
+
+void Game::takePWR()
 {
-	for (int i = 0; i < pwrPoints.size(); ++i)
+	for(int i = 0; i < units.size(); ++i)
 	{
-		if(units[unitIndex].x == pwrPoints[i].x && units[unitIndex].y == pwrPoints[i].y && pwrPoints[i].skin == '1')
+		if(units[i].id == recvBuffPtr[1])
 		{
-			units[unitIndex].pwr ++;
-			pwrPoints[i].skin = '0';
-			pwrPointsFrameNum ++;
-			break;
+			for (int j = 0; j < pwrPoints.size(); ++j)
+			{
+				if(units[i].x == pwrPoints[j].x && units[i].y == pwrPoints[j].y && pwrPoints[j].skin == '1')
+				{
+					units[i].pwr ++;
+					pwrPoints[j].skin = '0';
+					pwrPointsFrameNum ++;
+					return;
+				}
+			}
 		}
 	}
 }

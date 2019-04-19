@@ -11,7 +11,7 @@ class Server
 {
 public:
     void initServer();
-    void mainLoop(Game &gm);
+    void mainLoop(Game &gm, char &a);
 
 
 
