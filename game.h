@@ -11,7 +11,7 @@ const int SEND_BUFF_WORK_SIZE = 100000;
 struct CreateData
 {
 	char skin;
-	std::string planet;
+	std::string name;
 };
 
 struct PrintData
@@ -34,14 +34,7 @@ struct UnitBox
 	int x;
 	int y;
 	int pwr;
-	std::string planet;
-};
-
-struct StarBox
-{
-	std::string skinMap;
-	int x;
-	int y;
+	std::string name;
 };
 
 struct PwrPointBox
@@ -69,7 +62,6 @@ private:
     int clientidBuff;
 	int unitsFrameNum;
 	int pwrPointsFrameNum;
-	int starsFrameNum;
 	int printObjectsSize[3];
     CreateData createData;
 	std::vector<PrintData> printObjects;
@@ -77,8 +69,6 @@ private:
 	std::vector<UnitBox> units;
 	UnitBox unit;
 	std::vector<PwrPointBox> pwrPoints;
-	std::vector<StarBox> stars;
-	StarBox star;
 	PrintStatusData printStatus;
 
 
@@ -88,13 +78,10 @@ private:
 
 	void sendUnits(int &sendSize);
 	void sendPwrPoints(int &sendSize);
-	void sendStars(int &sendSize);
 	void sendStatus(int &sendSize);
 	void sendZero(int &sendSize);
 
 	void checkPointCollision(int unitid);
 	bool checkObstacle(int checkindex);
-	void createStars();
-	void createPlanet();
 
 };

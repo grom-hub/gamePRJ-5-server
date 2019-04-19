@@ -13,9 +13,6 @@ Game::Game()
 
 	unitsFrameNum = 1;
 	pwrPointsFrameNum = 1;
-	starsFrameNum = 1;
-
-	createStars();
 
 	pwrPoints.resize(3);
 
@@ -46,8 +43,7 @@ void Game::recvData(char *recvBuff, int clientid)
 		unitsFrameNum = 1;
 	if(pwrPointsFrameNum > 100)
 		pwrPointsFrameNum = 1;
-	if(starsFrameNum > 100)
-		starsFrameNum = 1;
+
 
 	if(unitsFrameNum == 100) // временная зарядка pwrPoints
 		for(int i = 0; i < pwrPoints.size(); ++i)
@@ -61,7 +57,7 @@ void Game::recvData(char *recvBuff, int clientid)
 	{
 		if(recvBuffPtr[2] != 0) // Обработка команды управления персонажем
 			if(recvBuffPtr[2] == 5)
-				createPlanet();
+				recvBuffPtr[2] = 5; // резерв
 			else
 				movePlayer();
 	}
@@ -80,8 +76,7 @@ void Game::sendData(char *sendPreBuff, int &sendSize)
 	if(recvBuffPtr[0] == 3)
 	{
 		if(unitsFrameNum == recvBuffPtr[3] 
-			&& pwrPointsFrameNum == recvBuffPtr[4] 
-			&& starsFrameNum == recvBuffPtr[5])
+			&& pwrPointsFrameNum == recvBuffPtr[4])
 			sendZero(sendSize);
 		else
 		{
@@ -97,14 +92,10 @@ void Game::sendData(char *sendPreBuff, int &sendSize)
 				sendPwrPoints(sendSize);
 				sendStatus(sendSize);
 			}
-			if(starsFrameNum != recvBuffPtr[5])
-			{
-				sendStars(sendSize);
-			}
 			sendPreBuffPtr[0] = 4; // тип пакета
 			sendPreBuffPtr[1] = unitsFrameNum;
 			sendPreBuffPtr[2] = pwrPointsFrameNum;
-			sendPreBuffPtr[3] = starsFrameNum;
+			sendPreBuffPtr[3] = 0; // резерв
 			std::memcpy(&sendPreBuffPtr[4], &printObjectsSize, sizeof(int) * 3);
 		}
 	}
@@ -184,31 +175,7 @@ void Game::sendStatus(int &sendSize)
 
 
 
-void Game::sendStars(int &sendSize)
-{
-	printObjects.clear();
-
-	for(int i = 0; i < stars.size(); ++i)
-	{
-		for(int j = 0; j < stars[i].skinMap.size(); ++j)
-		{
-			printObject.skin = stars[i].skinMap[j];
-			printObject.id = 0; // без 0 будет конфлик с units.id
-			printObject.x = stars[i].x;
-			printObject.y = stars[i].y + j;
-
-			printObjects.push_back(printObject);
-		}
-	}
-
-	printObjectsSize[2] = printObjects.size();
-
-	if(sendSize + printObjects.size() * sizeof(PrintData) > SEND_BUFF_WORK_SIZE)
-		std::cout << "SendBuffer overload !\n";
-
-	std::memcpy(&sendPreBuffPtr[sendSize], printObjects.data(), printObjects.size() * sizeof(PrintData));
-	sendSize += printObjects.size() * sizeof(PrintData);
-}
+// 	printObjectsSize[2] = printObjects.size();
 
 
 
@@ -222,12 +189,12 @@ void Game::sendZero(int &sendSize)
 
 void Game::createPlayer(int &sendSize)
 {
-	createData.planet.resize(recvBuffPtr[1]);
-	std::memcpy((void*) createData.planet.data(), &recvBuffPtr[3], recvBuffPtr[1]);
+	createData.name.resize(recvBuffPtr[1]);
+	std::memcpy((void*) createData.name.data(), &recvBuffPtr[3], recvBuffPtr[1]);
 
 	unit.id = clientidBuff;
     unit.skin = recvBuffPtr[2];
-    unit.planet = createData.planet;
+    unit.name = createData.name;
     unit.x = 6;
     unit.y = 34;
     unit.pwr = 0;
@@ -287,24 +254,6 @@ void Game::movePlayer()
 
 
 
-void Game::createPlanet()
-{
-	for(int i = 0; i < units.size(); ++i)
-	{
-		if(units[i].id == recvBuffPtr[1])
-		{
-			star.skinMap = units[i].planet;
-		    star.x = units[i].x;
-		    star.y = units[i].y + 1;
-
-		    stars.push_back(star);
-		    starsFrameNum ++;
-			break;
-		}
-	}
-}
-
-
 
 void Game::deletePlayer(int clientid)
 {
@@ -358,33 +307,3 @@ void Game::checkPointCollision(int unitIndex)
 	}
 }
 
-
-
-void Game::createStars()
-{
-	stars.clear();
-
-	star.skinMap = "(*)";
-    star.x = 0;
-    star.y = 15;
-
-    stars.push_back(star);
-
-    star.skinMap = "((*))";
-    star.x = 8;
-    star.y = 85;
-
-	stars.push_back(star);
-
-    star.skinMap = "(((*)))";
-    star.x = -10;
-    star.y = 45;
-
-    stars.push_back(star);
-
-    star.skinMap = "(-^-)";
-    star.x = 7;
-    star.y = 35;
-
-    stars.push_back(star);
-}
