@@ -46,7 +46,17 @@ void Server::initServer()
 }
 
 
-void Server::mainLoop(Game &gm, char &a)
+
+void Server::closeConnection()
+{
+    shutdown(listener, SHUT_RDWR);
+    close(listener);
+    std::cout << "listner - OFF" << std::endl;
+}
+
+
+
+void Server::mainLoop(Game &gm)
 {
 
 	while(true)
@@ -70,14 +80,6 @@ void Server::mainLoop(Game &gm, char &a)
         {
             perror("select");
             exit(3);
-        }
-        
-        if(a == 'q')
-        {
-            shutdown(listener, SHUT_RDWR);
-            close(listener);
-            std::cout << "listner - OFF" << std::endl;
-            return;
         }
 
         // Определяем тип события и выполняем соответствующие действия

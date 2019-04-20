@@ -20,28 +20,33 @@
 
 
 
-void threadFunction(char &a)
+void inputHeandler(Server &srv)
 {
-	while((a = getchar()) != 'q');
+    char a;
+    while(true)
+    {
+        a = getchar();
+        if(a == 'q')
+        {
+            srv.closeConnection();
+            return;
+        }
+    }
 }
 
 
 int main()
 {
-	char a;
     Game gm;
     Server srv;
 
-
-    std::thread thr(threadFunction, std::ref(a));
-
+    std::thread thr1(inputHeandler, std::ref(srv));
 
     srv.initServer();
 
-    srv.mainLoop(gm, a);
+    srv.mainLoop(gm);
 
-    std::cout << "Server - OFF" << std::endl;
-
-    thr.join();
+    std::cout << "End?" << std::endl;
+    thr1.join();
     return 0;
 }
