@@ -16,17 +16,20 @@ Game::Game()
 
 	pwrPoints.resize(3);
 
-	pwrPoints[0].skin = '1';
+	pwrPoints[0].skin = "(1)";
 	pwrPoints[0].x = 7;
 	pwrPoints[0].y = 20;
+	pwrPoints[0].pwr = 1;
 
-	pwrPoints[1].skin = '1';
+	pwrPoints[1].skin = "(2)";
 	pwrPoints[1].x = 10;
 	pwrPoints[1].y = 45;
+	pwrPoints[1].pwr = 2;
 
-	pwrPoints[2].skin = '1';
+	pwrPoints[2].skin = "((((0))))";
 	pwrPoints[2].x = 10;
 	pwrPoints[2].y = 55;
+	pwrPoints[2].pwr = 30;
 
 }
 
@@ -45,12 +48,12 @@ void Game::recvData(char *recvBuff, int clientid)
 		pwrPointsFrameNum = 1;
 
 
-	if(unitsFrameNum == 100) // временная зарядка pwrPoints
-		for(int i = 0; i < pwrPoints.size(); ++i)
-		{
-			pwrPoints[i].skin = '1';
-			pwrPointsFrameNum ++;
-		}
+	// if(unitsFrameNum == 100) // временная зарядка pwrPoints
+	// 	for(int i = 0; i < pwrPoints.size(); ++i)
+	// 	{
+	// 		pwrPoints[i].skin = '1';
+	// 		pwrPointsFrameNum ++;
+	// 	}
 //-------------------------------------------
 
 	if (recvBuffPtr[0] == 3) // Стандартный режим
@@ -131,16 +134,20 @@ void Game::sendUnits(int &sendSize)
 void Game::sendPwrPoints(int &sendSize)
 {
 	printObjects.clear();
-	printObjects.reserve(pwrPoints.size());
 
 	for(int i = 0; i < pwrPoints.size(); ++i)
 	{
-		printObject.skin = pwrPoints[i].skin;
-		printObject.id = 0; // без 0 будет конфлик с units.id
-		printObject.x = pwrPoints[i].x;
-		printObject.y = pwrPoints[i].y;
+		int sSize = pwrPoints[i].skin.size();
 
-		printObjects.push_back(printObject);
+		for(int j = 0; j < sSize; ++j)
+		{
+			printObject.skin = pwrPoints[i].skin[j];
+			printObject.id = 0; // без 0 будет конфлик с units.id
+			printObject.x = pwrPoints[i].x;
+			printObject.y = pwrPoints[i].y - sSize / 2 + j;
+
+			printObjects.push_back(printObject);
+		}
 	}
 
 	printObjectsSize[1] = printObjects.size();
@@ -317,15 +324,30 @@ void Game::takePWR()
 		{
 			for (int j = 0; j < pwrPoints.size(); ++j)
 			{
-				if(units[i].x == pwrPoints[j].x && units[i].y == pwrPoints[j].y && pwrPoints[j].skin == '1')
+				if(units[i].x == pwrPoints[j].x && units[i].y == pwrPoints[j].y && pwrPoints[j].pwr > 0)
 				{
 					units[i].pwr ++;
-					pwrPoints[j].skin = '0';
+					pwrPoints[j].pwr --;
+					setPwrPointSkin(j);
 					pwrPointsFrameNum ++;
 					return;
 				}
 			}
 		}
 	}
+}
+
+
+void Game::setPwrPointSkin(int id)
+{
+	pwrPoints[id].skin.clear();
+
+	for (int i = 0; i < pwrPoints[id].pwr / 10 + 1; ++i)
+		pwrPoints[id].skin += "(";
+
+	pwrPoints[id].skin += std::to_string(pwrPoints[id].pwr % 10);
+
+	for (int i = 0; i < pwrPoints[id].pwr / 10 + 1; ++i)
+	pwrPoints[id].skin += ")";
 }
 

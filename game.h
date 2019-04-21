@@ -39,7 +39,8 @@ struct UnitBox
 
 struct PwrPointBox
 {
-	char skin;
+	std::string skin;
+	int pwr;
 	int x;
 	int y;
 };
@@ -84,5 +85,6 @@ private:
 	void checkPointCollision(int unitid);
 	bool checkObstacle(int checkindex);
 	void takePWR();
+	void setPwrPointSkin(int id);
 
 };
