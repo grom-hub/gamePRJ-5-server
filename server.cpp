@@ -124,27 +124,31 @@ void Server::mainLoop(Game &gm)
 // Отправка данных ------------------------------------
                 gm.sendData(sendPreBuff, sendSize);
 
-
-                std::memcpy(&sendBuff, &sendSize, sizeof(int));
-
-                std::memcpy(&sendBuff[sizeof(int)], &sendPreBuff, sendSize);
-
-
-                bytesSend = send(*it, sendBuff, sendSize + sizeof(int), 0);
-
-                targetSendSize = sendSize + sizeof(int);
-
-                totalBytesSend = bytesSend;
-
-                while(totalBytesSend != targetSendSize)
+                if(sendSize > 1)
                 {
-                    usleep(1000);
+                    std::memcpy(&sendBuff, &sendSize, sizeof(int));
 
-                    bytesSend = send(*it, &sendBuff[totalBytesSend], targetSendSize - totalBytesSend, 0);
-                    totalBytesSend += bytesSend;
+                    std::memcpy(&sendBuff[sizeof(int)], &sendPreBuff, sendSize);
 
-                    std::cout << "ReSending.."<< std::endl;
+
+                    bytesSend = send(*it, sendBuff, sendSize + sizeof(int), 0);
+
+                    targetSendSize = sendSize + sizeof(int);
+
+                    totalBytesSend = bytesSend;
+
+                    while(totalBytesSend != targetSendSize)
+                    {
+                        usleep(1000);
+
+                        bytesSend = send(*it, &sendBuff[totalBytesSend], targetSendSize - totalBytesSend, 0);
+                        totalBytesSend += bytesSend;
+
+                        std::cout << "ReSending.."<< std::endl;
+                    }
                 }
+                else
+                    send(*it, sendPreBuff, 1, 0);
 
                 // std::cout << "send - " << test1 << std::endl;
             }

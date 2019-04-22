@@ -16,20 +16,20 @@ Game::Game()
 
 	pwrPoints.resize(3);
 
-	pwrPoints[0].skin = "(1)";
 	pwrPoints[0].x = 7;
 	pwrPoints[0].y = 20;
 	pwrPoints[0].pwr = 1;
 
-	pwrPoints[1].skin = "(2)";
 	pwrPoints[1].x = 10;
 	pwrPoints[1].y = 45;
 	pwrPoints[1].pwr = 2;
 
-	pwrPoints[2].skin = "((((0))))";
 	pwrPoints[2].x = 10;
 	pwrPoints[2].y = 55;
 	pwrPoints[2].pwr = 30;
+
+	for (int i = 0; i < pwrPoints.size(); ++i)
+		setPwrPointSkin(i);
 
 }
 
@@ -41,26 +41,19 @@ void Game::recvData(char *recvBuff, int clientid)
 	recvBuffPtr = recvBuff;
 	clientidBuff = clientid;
 
-//-------------------------------------------
 	if(unitsFrameNum > 100) // цикл счетчика
 		unitsFrameNum = 1;
 	if(pwrPointsFrameNum > 100)
 		pwrPointsFrameNum = 1;
 
 
-	// if(unitsFrameNum == 100) // временная зарядка pwrPoints
-	// 	for(int i = 0; i < pwrPoints.size(); ++i)
-	// 	{
-	// 		pwrPoints[i].skin = '1';
-	// 		pwrPointsFrameNum ++;
-	// 	}
-//-------------------------------------------
-
 	if (recvBuffPtr[0] == 3) // Стандартный режим
 	{
 		if(recvBuffPtr[2] != 0) // Обработка команды управления персонажем
 			if(recvBuffPtr[2] == 5)
 				takePWR();
+			else if(recvBuffPtr[2] == 6)
+				givePWR();
 			else
 				movePlayer();
 	}
@@ -103,6 +96,7 @@ void Game::sendData(char *sendPreBuff, int &sendSize)
 		}
 	}
 }
+
 
 
 void Game::sendUnits(int &sendSize)
@@ -251,7 +245,6 @@ void Game::movePlayer()
 				if(recvBuffPtr[2] == 4)
 					units[i].y--;
 
-				// checkPointCollision(i);
 				unitsFrameNum ++;
 			}
 			break;
@@ -300,42 +293,58 @@ bool Game::checkObstacle(int checkindex)
 
 
 
-// void Game::checkPointCollision(int unitIndex)
-// {
-// 	for (int i = 0; i < pwrPoints.size(); ++i)
-// 	{
-// 		if(units[unitIndex].x == pwrPoints[i].x && units[unitIndex].y == pwrPoints[i].y && pwrPoints[i].skin == '1')
-// 		{
-// 			units[unitIndex].pwr ++;
-// 			pwrPoints[i].skin = '0';
-// 			pwrPointsFrameNum ++;
-// 			break;
-// 		}
-// 	}
-// }
-
-
-
 void Game::takePWR()
 {
 	for(int i = 0; i < units.size(); ++i)
 	{
 		if(units[i].id == recvBuffPtr[1])
 		{
-			for (int j = 0; j < pwrPoints.size(); ++j)
+			if(units[i].pwr < 10)
 			{
-				if(units[i].x == pwrPoints[j].x && units[i].y == pwrPoints[j].y && pwrPoints[j].pwr > 0)
+				for (int j = 0; j < pwrPoints.size(); ++j)
 				{
-					units[i].pwr ++;
-					pwrPoints[j].pwr --;
-					setPwrPointSkin(j);
-					pwrPointsFrameNum ++;
-					return;
+					if(units[i].x == pwrPoints[j].x && units[i].y == pwrPoints[j].y && pwrPoints[j].pwr > 0)
+					{
+						units[i].pwr ++;
+						pwrPoints[j].pwr --;
+						setPwrPointSkin(j);
+						pwrPointsFrameNum ++;
+						return;
+					}
 				}
 			}
+			break;
 		}
 	}
 }
+
+
+
+void Game::givePWR()
+{
+	for(int i = 0; i < units.size(); ++i)
+	{
+		if(units[i].id == recvBuffPtr[1])
+		{
+			if(units[i].pwr > 0)
+			{
+				for (int j = 0; j < pwrPoints.size(); ++j)
+				{
+					if(units[i].x == pwrPoints[j].x && units[i].y == pwrPoints[j].y)
+					{
+						units[i].pwr --;
+						pwrPoints[j].pwr ++;
+						setPwrPointSkin(j);
+						pwrPointsFrameNum ++;
+						return;
+					}
+				}
+			}
+			break;
+		}
+	}
+}
+
 
 
 void Game::setPwrPointSkin(int id)
