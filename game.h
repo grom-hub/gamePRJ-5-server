@@ -85,7 +85,5 @@ private:
 	void checkPointCollision(int unitid);
 	bool checkObstacle(int checkindex);
 	void takePWR();
-	void givePWR();
-	void setPwrPointSkin(int id);
 
 };

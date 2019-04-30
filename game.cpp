@@ -14,7 +14,7 @@ Game::Game()
 	unitsFrameNum = 1;
 	pwrPointsFrameNum = 1;
 
-	pwrPoints.resize(3);
+	pwrPoints.resize(5);
 
 	pwrPoints[0].x = 7;
 	pwrPoints[0].y = 20;
@@ -26,10 +26,15 @@ Game::Game()
 
 	pwrPoints[2].x = 10;
 	pwrPoints[2].y = 55;
-	pwrPoints[2].pwr = 30;
+	pwrPoints[2].pwr = 3;
 
-	for (int i = 0; i < pwrPoints.size(); ++i)
-		setPwrPointSkin(i);
+	pwrPoints[3].x = 30;
+	pwrPoints[3].y = 0;
+	pwrPoints[3].pwr = 2;
+
+	pwrPoints[4].x = -5;
+	pwrPoints[4].y = 80;
+	pwrPoints[4].pwr = 5;
 
 }
 
@@ -52,8 +57,6 @@ void Game::recvData(char *recvBuff, int clientid)
 		if(recvBuffPtr[2] != 0) // Обработка команды управления персонажем
 			if(recvBuffPtr[2] == 5)
 				takePWR();
-			else if(recvBuffPtr[2] == 6)
-				givePWR();
 			else
 				movePlayer();
 	}
@@ -131,14 +134,14 @@ void Game::sendPwrPoints(int &sendSize)
 
 	for(int i = 0; i < pwrPoints.size(); ++i)
 	{
-		int sSize = pwrPoints[i].skin.size();
+		pwrPoints[i].skin = "(" + std::to_string(pwrPoints[i].pwr) + ")";
 
-		for(int j = 0; j < sSize; ++j)
+		for(int j = 0; j < 3; ++j)
 		{
 			printObject.skin = pwrPoints[i].skin[j];
 			printObject.id = 0; // без 0 будет конфлик с units.id
 			printObject.x = pwrPoints[i].x;
-			printObject.y = pwrPoints[i].y - sSize / 2 + j;
+			printObject.y = pwrPoints[i].y + j - 1;
 
 			printObjects.push_back(printObject);
 		}
@@ -307,7 +310,6 @@ void Game::takePWR()
 					{
 						units[i].pwr ++;
 						pwrPoints[j].pwr --;
-						setPwrPointSkin(j);
 						pwrPointsFrameNum ++;
 						return;
 					}
@@ -320,43 +322,4 @@ void Game::takePWR()
 
 
 
-void Game::givePWR()
-{
-	for(int i = 0; i < units.size(); ++i)
-	{
-		if(units[i].id == recvBuffPtr[1])
-		{
-			if(units[i].pwr > 0)
-			{
-				for (int j = 0; j < pwrPoints.size(); ++j)
-				{
-					if(units[i].x == pwrPoints[j].x && units[i].y == pwrPoints[j].y)
-					{
-						units[i].pwr --;
-						pwrPoints[j].pwr ++;
-						setPwrPointSkin(j);
-						pwrPointsFrameNum ++;
-						return;
-					}
-				}
-			}
-			break;
-		}
-	}
-}
-
-
-
-void Game::setPwrPointSkin(int id)
-{
-	pwrPoints[id].skin.clear();
-
-	for (int i = 0; i < pwrPoints[id].pwr / 10 + 1; ++i)
-		pwrPoints[id].skin += "(";
-
-	pwrPoints[id].skin += std::to_string(pwrPoints[id].pwr % 10);
-
-	for (int i = 0; i < pwrPoints[id].pwr / 10 + 1; ++i)
-	pwrPoints[id].skin += ")";
-}
 
