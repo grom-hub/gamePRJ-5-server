@@ -34,6 +34,7 @@ struct UnitBox
 	int x;
 	int y;
 	int pwr;
+	int time;
 	std::string name;
 };
 
@@ -41,6 +42,7 @@ struct PwrPointBox
 {
 	std::string skin;
 	int pwr;
+	int time;
 	int x;
 	int y;
 };
@@ -53,6 +55,8 @@ public:
 	void recvData(char *recvBuff, int clientid);
 	void sendData(char *sendBuff, int &sendSize);
 	void deletePlayer(int clientid);
+	void unitPwrDecrement();
+	void pointPwrIncrement();
 
 
 

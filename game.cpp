@@ -19,22 +19,27 @@ Game::Game()
 	pwrPoints[0].x = 7;
 	pwrPoints[0].y = 20;
 	pwrPoints[0].pwr = 1;
+	pwrPoints[0].time = 10;
 
 	pwrPoints[1].x = 10;
 	pwrPoints[1].y = 45;
 	pwrPoints[1].pwr = 2;
+	pwrPoints[1].time = 5;
 
 	pwrPoints[2].x = 10;
 	pwrPoints[2].y = 55;
 	pwrPoints[2].pwr = 3;
+	pwrPoints[2].time = 15;
 
 	pwrPoints[3].x = 30;
 	pwrPoints[3].y = 0;
 	pwrPoints[3].pwr = 2;
+	pwrPoints[3].time = 3;
 
 	pwrPoints[4].x = -5;
 	pwrPoints[4].y = 80;
 	pwrPoints[4].pwr = 5;
+	pwrPoints[4].time = 0;
 
 }
 
@@ -201,7 +206,8 @@ void Game::createPlayer(int &sendSize)
     unit.name = createData.name;
     unit.x = 6;
     unit.y = 34;
-    unit.pwr = 0;
+    unit.pwr = 60;
+    unit.time = 0;
 
     bool checkFreeSpace;
     do
@@ -302,17 +308,15 @@ void Game::takePWR()
 	{
 		if(units[i].id == recvBuffPtr[1])
 		{
-			if(units[i].pwr < 10)
+			for (int j = 0; j < pwrPoints.size(); ++j)
 			{
-				for (int j = 0; j < pwrPoints.size(); ++j)
+				if(units[i].x == pwrPoints[j].x && units[i].y == pwrPoints[j].y && pwrPoints[j].pwr > 0)
 				{
-					if(units[i].x == pwrPoints[j].x && units[i].y == pwrPoints[j].y && pwrPoints[j].pwr > 0)
-					{
-						units[i].pwr ++;
-						pwrPoints[j].pwr --;
-						pwrPointsFrameNum ++;
-						return;
-					}
+					units[i].pwr ++;
+					pwrPoints[j].pwr --;
+					pwrPoints[j].time = 0;
+					pwrPointsFrameNum ++;
+					return;
 				}
 			}
 			break;
@@ -321,5 +325,37 @@ void Game::takePWR()
 }
 
 
+
+void Game::unitPwrDecrement()
+{
+	for (int i = 0; i < units.size(); ++i)
+	{
+		units[i].time ++;
+		if(units[i].time == 20)
+		{
+			units[i].pwr --;
+			units[i].time = 0;
+			pwrPointsFrameNum ++;
+		}
+	}
+}
+
+
+void Game::pointPwrIncrement()
+{
+	for (int i = 0; i < pwrPoints.size(); ++i)
+	{
+		if(pwrPoints[i].pwr < 9)
+		{
+			pwrPoints[i].time ++;
+			if(pwrPoints[i].time == 60)
+			{
+				pwrPoints[i].pwr ++;
+				pwrPoints[i].time = 0;
+				pwrPointsFrameNum ++;
+			}
+		}
+	}
+}
 
 
